@@ -1,0 +1,38 @@
+# Використовуємо готовий образ Node.js для збирання та запуску додатку
+
+# Використовуємо готовий образ Nginx для запуску додатку
+FROM nginx:latest
+
+# Копіюємо файли збірки з попереднього етапу в директорію Nginx
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Копіюємо конфігураційний файл Nginx для клієнтського додатку
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Встановлюємо змінну середовища для Nginx
+ENV PORT 80
+
+# Відкриваємо порт 80 для доступу до додатку
+EXPOSE 80
+
+# Запускаємо Nginx
+CMD ["nginx", "-g", "daemon off;"]
+
+FROM node:alpine AS build
+
+# Встановлюємо робочу директорію
+WORKDIR /app
+
+# Копіюємо файли залежностей та пакетний файл
+COPY package*.json ./
+
+# Встановлюємо залежності
+RUN npm install
+
+# Install npm using apk package manager
+RUN apk add --update npm
+
+# Копіюємо решту файлів проекту
+COPY . .
+
+#RUN npm run build
