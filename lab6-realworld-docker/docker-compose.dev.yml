@@ -1,0 +1,31 @@
+version: "3"
+services: 
+  nginx:
+    image: nginx:1-alpine
+    container_name: websystem-docker-demo-nginx-dev
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/conf.d/nginx.conf
+    depends_on:
+      - frontend
+      - api
+  api:
+    build: .
+    command: npm run dev
+    volumes:
+      - ./api/src:/usr/src/app/src
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: realworld-docker-frontend
+    command: npm start
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    environment: 
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - './frontend:/usr/src/app'
+      - '/app/node_modules'
